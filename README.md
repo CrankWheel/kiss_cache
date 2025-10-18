@@ -2,8 +2,10 @@
 
 A simple, fast ETS-based cache with timed expiry for Erlang and Elixir.
 
-Authored by Jói Sigurdsson (joi@crankwheel.com, https://joisig.com/) and copyright
-CrankWheel ehf. Initially developed for CrankWheel Screen Sharing back in 2021.
+Copyright CrankWheel ehf. 2025. Initially developed for CrankWheel Screen Sharing back in 2021,
+(https://crankwheel.com/).
+
+Authored by Jói Sigurdsson (https://joisig.com/).
 
 ## Features
 

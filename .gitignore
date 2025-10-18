@@ -1,0 +1,24 @@
+# Mix artifacts
+/_build
+/deps
+*.ez
+
+# Documentation
+/doc
+/.fetch
+
+# Erlang compilation artifacts
+*.beam
+*.plt
+erl_crash.dump
+
+# IDE and OS files
+.DS_Store
+.idea/
+*.swp
+*.swo
+*~
+
+# Test artifacts
+.eunit/
+cover/

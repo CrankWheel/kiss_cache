@@ -40,6 +40,7 @@ defmodule KissCache.TestHelpers do
     case :ets.lookup(cache, :expensive_calls) do
       [] ->
         :ets.insert(cache, {:expensive_calls, 0, 0})
+
       _ ->
         :ok
     end
@@ -55,6 +56,7 @@ defmodule KissCache.TestHelpers do
   # Get expensive function call count
   def get_expensive_call_count do
     cache = :kiss_cache_test_meta
+
     case :ets.lookup(cache, :expensive_calls) do
       [{:expensive_calls, _expiry, count}] -> count
       [] -> 0

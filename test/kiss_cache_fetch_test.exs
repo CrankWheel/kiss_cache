@@ -15,20 +15,24 @@ defmodule KissCacheFetchTest do
     TestHelpers.reset_expensive_call_count()
 
     # Start supervisor for fetch tests - restart if dead
-    sup_pid = case Process.whereis(:kiss_cache_sup) do
-      nil ->
-        {:ok, pid} = :supervisor.start_link({:local, :kiss_cache_sup}, :kiss_cache_sup, [])
-        pid
-
-      pid when is_pid(pid) ->
-        if Process.alive?(pid) do
+    sup_pid =
+      case Process.whereis(:kiss_cache_sup) do
+        nil ->
+          {:ok, pid} = :supervisor.start_link({:local, :kiss_cache_sup}, :kiss_cache_sup, [])
           pid
-        else
-          Process.unregister(:kiss_cache_sup)
-          {:ok, new_pid} = :supervisor.start_link({:local, :kiss_cache_sup}, :kiss_cache_sup, [])
-          new_pid
-        end
-    end
+
+        pid when is_pid(pid) ->
+          if Process.alive?(pid) do
+            pid
+          else
+            Process.unregister(:kiss_cache_sup)
+
+            {:ok, new_pid} =
+              :supervisor.start_link({:local, :kiss_cache_sup}, :kiss_cache_sup, [])
+
+            new_pid
+          end
+      end
 
     on_exit(fn ->
       if Process.alive?(sup_pid), do: Process.exit(sup_pid, :normal)
@@ -55,7 +59,8 @@ defmodule KissCacheFetchTest do
       result = :kiss_cache.fetch(:kiss_cache_test, KissCache.TestHelpers, :test_echo, [42])
 
       assert result == 42
-      assert TestHelpers.get_echoes() == [42]  # Still just one call
+      # Still just one call
+      assert TestHelpers.get_echoes() == [42]
     end
 
     test "different parameters create different cache entries" do
@@ -81,31 +86,37 @@ defmodule KissCacheFetchTest do
     test "commits result to cache when CheckReturn returns :commit" do
       check_fn = fn _result -> :commit end
 
-      result = :kiss_cache.fetch(:kiss_cache_test, KissCache.TestHelpers, :test_echo, [1], check_fn)
+      result =
+        :kiss_cache.fetch(:kiss_cache_test, KissCache.TestHelpers, :test_echo, [1], check_fn)
 
       assert result == 1
       assert TestHelpers.get_echoes() == [1]
 
       # Second call should be from cache
-      result2 = :kiss_cache.fetch(:kiss_cache_test, KissCache.TestHelpers, :test_echo, [1], check_fn)
+      result2 =
+        :kiss_cache.fetch(:kiss_cache_test, KissCache.TestHelpers, :test_echo, [1], check_fn)
 
       assert result2 == 1
-      assert TestHelpers.get_echoes() == [1]  # Still one call
+      # Still one call
+      assert TestHelpers.get_echoes() == [1]
     end
 
     test "ignores result when CheckReturn returns :ignore" do
       check_fn = fn _result -> :ignore end
 
-      result = :kiss_cache.fetch(:kiss_cache_test, KissCache.TestHelpers, :test_echo, [1], check_fn)
+      result =
+        :kiss_cache.fetch(:kiss_cache_test, KissCache.TestHelpers, :test_echo, [1], check_fn)
 
       assert result == 1
       assert TestHelpers.get_echoes() == [1]
 
       # Second call should NOT be from cache (function called again)
-      result2 = :kiss_cache.fetch(:kiss_cache_test, KissCache.TestHelpers, :test_echo, [1], check_fn)
+      result2 =
+        :kiss_cache.fetch(:kiss_cache_test, KissCache.TestHelpers, :test_echo, [1], check_fn)
 
       assert result2 == 1
-      assert TestHelpers.get_echoes() == [1, 1]  # Called twice
+      # Called twice
+      assert TestHelpers.get_echoes() == [1, 1]
     end
 
     test "can conditionally cache based on result value" do
@@ -119,7 +130,8 @@ defmodule KissCacheFetchTest do
       :kiss_cache.fetch(:kiss_cache_test, KissCache.TestHelpers, :test_echo, [-1], check_fn)
       :kiss_cache.fetch(:kiss_cache_test, KissCache.TestHelpers, :test_echo, [-1], check_fn)
 
-      assert TestHelpers.get_echoes() == [-1, -1]  # Called twice
+      # Called twice
+      assert TestHelpers.get_echoes() == [-1, -1]
 
       TestHelpers.clear_echoes()
 
@@ -127,7 +139,8 @@ defmodule KissCacheFetchTest do
       :kiss_cache.fetch(:kiss_cache_test, KissCache.TestHelpers, :test_echo, [1], check_fn)
       :kiss_cache.fetch(:kiss_cache_test, KissCache.TestHelpers, :test_echo, [1], check_fn)
 
-      assert TestHelpers.get_echoes() == [1]  # Called once
+      # Called once
+      assert TestHelpers.get_echoes() == [1]
     end
   end
 
@@ -270,12 +283,15 @@ defmodule KissCacheFetchTest do
     test "throws exception from fetch when function throws" do
       # When function throws, the fetcher process exits abnormally
       # and the exit reason is thrown back
-      result = catch_throw(:kiss_cache.fetch(
-        :kiss_cache_test,
-        KissCache.TestHelpers,
-        :throwing_function,
-        []
-      ))
+      result =
+        catch_throw(
+          :kiss_cache.fetch(
+            :kiss_cache_test,
+            KissCache.TestHelpers,
+            :throwing_function,
+            []
+          )
+        )
 
       # Result is the abnormal exit tuple
       assert {{:nocatch, :intentional_error}, _stacktrace} = result
@@ -283,12 +299,15 @@ defmodule KissCacheFetchTest do
 
     test "handles non-existent function gracefully" do
       # Non-existent functions throw :undef error via fetcher
-      result = catch_throw(:kiss_cache.fetch(
-        :kiss_cache_test,
-        KissCache.TestHelpers,
-        :non_existent_function,
-        []
-      ))
+      result =
+        catch_throw(
+          :kiss_cache.fetch(
+            :kiss_cache_test,
+            KissCache.TestHelpers,
+            :non_existent_function,
+            []
+          )
+        )
 
       # Should throw :undef error tuple
       assert {:undef, _stacktrace} = result

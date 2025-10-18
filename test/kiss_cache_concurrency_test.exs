@@ -286,7 +286,8 @@ defmodule KissCacheConcurrencyTest do
 
       # All should be present
       cache_size = :ets.info(:kiss_cache_test, :size)
-      assert cache_size >= 450  # Allow for some timing variance
+      # Allow for some timing variance
+      assert cache_size >= 450
     end
   end
 

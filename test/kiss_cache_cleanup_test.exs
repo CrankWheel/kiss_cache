@@ -188,16 +188,18 @@ defmodule KissCacheCleanupTest do
 
       # Put with 1 in 2 chance of cleanup - should eventually trigger
       # Track the minimum size we see
-      sizes = for i <- 1..100 do
-        :kiss_cache.put(:kiss_cache_test, :"key_#{i}", :value, 10_000, 2)
-        :ets.info(:kiss_cache_test, :size)
-      end
+      sizes =
+        for i <- 1..100 do
+          :kiss_cache.put(:kiss_cache_test, :"key_#{i}", :value, 10_000, 2)
+          :ets.info(:kiss_cache_test, :size)
+        end
 
       min_size = Enum.min(sizes)
 
       # With 1 in 2 chance over 100 attempts, cleanup should have triggered at least once
       # When cleanup triggers, expired entries (5) are removed, so size should drop below 100
-      assert min_size < 100, "Cleanup should have triggered at least once, but min size was #{min_size}"
+      assert min_size < 100,
+             "Cleanup should have triggered at least once, but min size was #{min_size}"
     end
   end
 

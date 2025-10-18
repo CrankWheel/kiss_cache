@@ -1,0 +1,67 @@
+name: CI
+
+on:
+  push:
+    branches: [ master, main ]
+  pull_request:
+    branches: [ master, main ]
+
+jobs:
+  test:
+    name: Test OTP ${{matrix.otp}} / Elixir ${{matrix.elixir}}
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        otp: ['25.0', '26.0', '27.0']
+        elixir: ['1.14.5', '1.15.7', '1.16.0']
+        exclude:
+          # OTP 27 requires Elixir 1.17+
+          - otp: '27.0'
+            elixir: '1.14.5'
+          - otp: '27.0'
+            elixir: '1.15.7'
+          - otp: '27.0'
+            elixir: '1.16.0'
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Elixir
+      uses: erlef/setup-beam@v1
+      with:
+        otp-version: ${{matrix.otp}}
+        elixir-version: ${{matrix.elixir}}
+
+    - name: Restore dependencies cache
+      uses: actions/cache@v3
+      with:
+        path: deps
+        key: ${{ runner.os }}-mix-${{ hashFiles('**/mix.lock') }}
+        restore-keys: ${{ runner.os }}-mix-
+
+    - name: Install dependencies
+      run: mix deps.get
+
+    - name: Compile
+      run: mix compile --warnings-as-errors
+
+    - name: Run tests
+      run: mix test
+
+  erlang-compile:
+    name: Compile with rebar3 (Erlang only)
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Erlang
+      uses: erlef/setup-beam@v1
+      with:
+        otp-version: '26.0'
+
+    - name: Compile with rebar3
+      run: |
+        wget https://s3.amazonaws.com/rebar3/rebar3
+        chmod +x rebar3
+        ./rebar3 compile

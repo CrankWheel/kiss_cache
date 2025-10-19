@@ -63,5 +63,5 @@ jobs:
 
     - name: Compile with rebar3
       run: |
-        mix local.rebar rebar3 ./rebar3 --force
-        ./rebar3 compile
+        REBAR3_PATH=$(mix local.rebar --force | sed -n 's/\* creating //p')
+        $REBAR3_PATH compile

@@ -31,7 +31,7 @@ defmodule KissCache.MixProject do
     ]
   end
 
-  defp extra_applications(:test), do: [:elixir]
+  defp extra_applications(:test), do: [:eunit, :elixir]
   defp extra_applications(_), do: []
 
   defp deps do

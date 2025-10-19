@@ -59,9 +59,9 @@ jobs:
       uses: erlef/setup-beam@v1
       with:
         otp-version: '26.0'
+        elixir-version: '1.16.0'
 
     - name: Compile with rebar3
       run: |
-        wget https://s3.amazonaws.com/rebar3/rebar3
-        chmod +x rebar3
+        mix local.rebar rebar3 ./rebar3 --force
         ./rebar3 compile
